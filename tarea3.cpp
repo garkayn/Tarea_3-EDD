@@ -171,11 +171,11 @@ class tGrafo {
     public:
         void leerArchivo(fstream &file){
             file>>cantidadVertices;
-            cout<<"FUNCIONO Y VALGO: "<<cantidadVertices<<endl;
+            cout<<"CANTIDAD DE VERTICES: "<<cantidadVertices<<endl;
             file>>cantidadEnlaces;
-            cout<<"FUNCIONO Y VALGO: "<<cantidadEnlaces<<endl;
+            cout<<"CANTIDAD DE ENLACES: "<<cantidadEnlaces<<endl;
             file>>cantidadConductores;
-            cout<<"FUNCIONO Y VALGO: "<<cantidadConductores<<endl;
+            cout<<"CANTIDAD DE CONDUCTORES: "<<cantidadConductores<<endl;
         }
         void construirGrafo(fstream &file){
             adyLista = new tLista[cantidadVertices]; 
@@ -250,27 +250,60 @@ class tGrafo {
         bool isEdge(int vertice, int vecino){
             return adyLista[vertice-1].buscar(vecino);
         }
+        void volverInicio(int vertice){
+            adyLista[vertice-1].moveToStart();
+        }
 };
 
-void BFS(tGrafo& G, int v) {
-    tCola Q; int w, z;
-    Q.enqueue(v);
-    G.setMark(v, VISITADO);
+void BFS(tGrafo& G, int origen, int destino) {
+    tCola Q; int vecino;
+    int n = G.nVertex();
+    int* padres = new int[n];
+    for(int i=0; i<n; i++){
+        padres[i] = -1;
+    }
+    int existe = 0;
+    G.setMarkFalse();
+    Q.enqueue(origen);
+    G.setMark(origen, VISITADO);
     while (Q.getSize() != 0) {
-        z = Q.frontValue();
-        cout<<z<<endl;
+        int front = Q.frontValue();
         Q.dequeue();
-        G.setMark(z,VISITADO);
-        w=G.first(z);
-        for (int i=0; i < G.cantVecinosV(w); w = G.next(z)){
-            cout<<"AUN NO TERMINO WALALA"<<endl;
-            if (G.getMark(w) == NOVISITADO) {
-                G.setMark(w, VISITADO);
-                Q.enqueue(w);
-             }
-             i++;
-    }}
-    cout<<"FUNCIONE COMPLETO"<<endl;
+        if(front == destino){
+            existe = 1;
+            break;
+        }
+        if(G.cantVecinosV(front) != 0){
+            G.setMark(front, VISITADO);
+            vecino = G.first(front);
+            for (int i = 0; i < G.cantVecinosV(front); i++) {
+                if (G.getMark(vecino) == NOVISITADO) {
+                    //cout<<"NODO A VISITAR: "<<vecino<<endl;
+                    G.setMark(vecino, VISITADO);
+                    padres[vecino - 1] = front;
+                    //cout<<"VERTICE POR HACER ENQUEUE: "<<vecino<<endl;
+                    Q.enqueue(vecino);
+                }
+                vecino = G.next(front);
+            }
+            G.volverInicio(front);
+        }
+    }
+    if(existe==1){
+        int* camino = new int[n];
+        int largo = 0;
+        int iterador = destino;
+        while(iterador != origen){
+            if(G.isEdge(padres[iterador-1], iterador)){
+                camino[largo++] = iterador;
+            }
+            iterador = padres[iterador-1];
+        }
+        camino[largo++] = origen;
+        for(int i=0; i<largo; i++){
+            cout<<camino[i]<<endl;
+        }
+    }
 }
 
 int main(){
@@ -279,7 +312,7 @@ int main(){
     tGrafo grafo;
     grafo.leerArchivo(file);
     grafo.construirGrafo(file);
-
+    BFS(grafo,20,24);
     //grafo.mostrarMarcas();
     //grafo.mostrarVecinos();
 }
