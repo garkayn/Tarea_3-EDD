@@ -253,9 +253,12 @@ class tGrafo {
         void volverInicio(int vertice){
             adyLista[vertice-1].moveToStart();
         }
+        int mostrarCantConductores(){
+            return cantidadConductores;
+        }
 };
 
-void BFS(tGrafo& G, int origen, int destino) {
+tLista BFS(tGrafo& G, int origen, int destino) {
     tCola Q; int vecino;
     int n = G.nVertex();
     int* padres = new int[n];
@@ -289,30 +292,40 @@ void BFS(tGrafo& G, int origen, int destino) {
             G.volverInicio(front);
         }
     }
-    if(existe==1){
-        int* camino = new int[n];
-        int largo = 0;
+    tLista camino;
+    if(existe==1){    
         int iterador = destino;
         while(iterador != origen){
-            if(G.isEdge(padres[iterador-1], iterador)){
-                camino[largo++] = iterador;
+            if(G.isEdge(padres[iterador-1], iterador)){ //iterador representa el valor en si del nodo
+                camino.append(iterador);
             }
             iterador = padres[iterador-1];
         }
-        camino[largo++] = origen;
-        for(int i=0; i<largo; i++){
-            cout<<camino[i]<<endl;
-        }
-    }
+        camino.append(origen);
+    }else{
+        camino.append(-1);
+    }   
+    return camino;
 }
 
 int main(){
+    int cantConductores;
     fstream file;
     file.open("data1.txt",  ios::in);
     tGrafo grafo;
     grafo.leerArchivo(file);
     grafo.construirGrafo(file);
-    BFS(grafo,20,24);
+    cantConductores = grafo.mostrarCantConductores(); 
+    int* posicionConductores = new int[cantConductores];
+    for(int i=0; i<cantConductores;i++){
+        file>>posicionConductores[i];
+    }
+    tLista* conductoresToCliente = new tLista[cantConductores];
+    for(int i=0; i<cantConductores;i++){
+        conductoresToCliente[i] = BFS(grafo,posicionConductores[i],12);
+        cout<<"CONDUCTOR: "<<i+1<<" HACIA CLIENTE EN NODO 12 TIENE EL SIGUIENTE CAMINO: "<<endl;
+        conductoresToCliente[i].imprimirLista();
+    }
     //grafo.mostrarMarcas();
     //grafo.mostrarVecinos();
 }
