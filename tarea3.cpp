@@ -5,6 +5,12 @@
 using namespace std;
 #define NOVISITADO false
 #define VISITADO true
+#define INFINITO 2147483647
+typedef int tVertice;
+
+// ============================================================
+// Sección 1: TDA Lista para implementación de grafos y caminos
+// ============================================================
 
 struct tNodoLista {
     int id;
@@ -58,7 +64,7 @@ class tLista{
         void imprimirLista(){
             tNodoLista* temp = head;
             while(temp != nullptr){
-                cout<<temp->id<<endl;
+                cout<<temp->id;
                 temp = temp->next;
             }
         }
@@ -97,6 +103,10 @@ class tLista{
         }
 
 };
+
+// ==============================================
+// Sección 2: TDA Cola para implementación en BFS
+// ==============================================
 
 struct tNodoCola {
     tNodoLista nodo;
@@ -159,6 +169,9 @@ class tCola {
         }
 };
 
+// ====================
+// Sección 3: TDA Grafo
+// ====================
 
 class tGrafo {
     private:
@@ -177,6 +190,21 @@ class tGrafo {
             file>>cantidadConductores;
             cout<<"CANTIDAD DE CONDUCTORES: "<<cantidadConductores<<endl;
         }
+
+        /*****
+        * void construirGrafo
+        ******
+        * Lee y carga la parte del archivo donde se almacenan los enlaces entre los nodos.
+        * Asigna memoria dinámica para dos arreglos, uno que contendrá las listas de adyacencia, se trabaja de tal forma que el índice del arreglo
+        * represente al vértice i-1, es decir, para el vértice 1, su lista de adyacencia de encuentra en el índice 0 del arreglo. Y otro arreglo con
+        * las marcas de los nodos, para verificar si están o no visitados, primeramente se inicializan en no visitados y su manejo de los índices es idéntica al anterior.
+        ******
+        * Input:
+        * fstream &file : Archivo ya abierto en modo lectura
+        ******
+        * Efecto:
+        * Construye la lista de adyacencia de cada vértice e inicializa las marcas de cada uno en no visitado.
+        *****/
         void construirGrafo(fstream &file){
             adyLista = new tLista[cantidadVertices]; 
             marcas = new bool[cantidadVertices];
@@ -193,11 +221,11 @@ class tGrafo {
             }
         }
 
-        void mostrarVecinos(){
+        void mostrarVecinos(){ //borrable
             for(int i=0; i<cantidadVertices; i++){
                 cout<<"VERTICE: "<<i+1<<endl;
-                cout<<"QUE TIENE LOS SIGUIENTES VECINOS (HOT): "<<endl;
-                for(int j=0; j<adyLista[i].length() ; j++){
+                cout<<"QUE TIENE LOS SIGUIENTES VECINOS: "<<endl;
+                for(int j=0; j<adyLista[i].length(); j++) { 
                     cout<<adyLista[i].currValue()<<endl;
                     adyLista[i].next();
                 }
@@ -206,7 +234,7 @@ class tGrafo {
             }
         }
 
-        void mostrarMarcas(){
+        void mostrarMarcas(){ //borrable
             for(int i=0;i<cantidadVertices;i++){
                 cout<<"VERTICE: "<<i+1<<" CON MARCA: "<<marcas[i]<<endl;
             }
@@ -257,6 +285,27 @@ class tGrafo {
             return cantidadConductores;
         }
 };
+
+// =============================================================
+// Sección 4: Implementación del BFS y reconstrucción del camino
+// =============================================================
+
+/*****
+* tLista BFS
+******
+* La primera parte, visita los nodos en el orden de un BFS, y guarda en el arreglo padres, al vértice que encoló al otro, es decir, si 1 tiene como vecinos a 2, 3 y 4,
+* en la posicíon 1 2 y 3, respectivamente, se guardaría a 1, que encoló y desde ese vértice se visitó a 2, 3 y 4.
+* La segunda parte, reconstruye el camino que buscamos, teniendo en cuenta los parámetros de origen y destino.
+* Explicar como se reconstruye el camino
+******
+* Input:
+* tGrafo& G : TDA Grafo recibido por referencia
+* int origen : Vértice de origen del camino buscado
+* int destino : Vértice de destino del camino buscado
+******
+* Returns:
+* tLista , el camino más corto desde un origen hacia un destino dado, en caso de que dicho camino no exista, una lista con único elemento un -1
+*****/
 
 tLista BFS(tGrafo& G, int origen, int destino) {
     tCola Q; int vecino;
@@ -310,6 +359,8 @@ tLista BFS(tGrafo& G, int origen, int destino) {
 
 int main(){
     int cantConductores;
+    int inicio,fin;
+    int dConductor = INFINITO;
     fstream file;
     file.open("data1.txt",  ios::in);
     tGrafo grafo;
@@ -320,12 +371,42 @@ int main(){
     for(int i=0; i<cantConductores;i++){
         file>>posicionConductores[i];
     }
-    tLista* conductoresToCliente = new tLista[cantConductores];
-    for(int i=0; i<cantConductores;i++){
-        conductoresToCliente[i] = BFS(grafo,posicionConductores[i],12);
-        cout<<"CONDUCTOR: "<<i+1<<" HACIA CLIENTE EN NODO 12 TIENE EL SIGUIENTE CAMINO: "<<endl;
-        conductoresToCliente[i].imprimirLista();
+
+    while(inicio != -1 && fin != -1){
+        cout<<"Ingrese viaje: "<<endl;
+        cin>>inicio;
+        cin>>fin;
+        int conductorCercano;
+        tLista ruta = BFS(grafo,inicio,fin);
+        tLista recorridoConductor;
+        for(int i=0; i<cantConductores;i++){
+            recorridoConductor = BFS(grafo,posicionConductores[i],inicio);
+            if (recorridoConductor.length() < dConductor && recorridoConductor.currValue() != -1){
+                dConductor = recorridoConductor.length(); 
+                conductorCercano = i;
+            }
+        }
+        posicionConductores[conductorCercano] = fin;
+
+        int dViaje = ruta.length();
+        int costo = 300*(dConductor-1) + 500*(dViaje-1);
+
+        cout<<"Ruta: {";
+        ruta.moveToStart();
+
+        if (ruta.currValue() != -1){
+            ruta.moveToEnd();
+            cout<<ruta.currValue();
+            for(int i = 0; i < ruta.length()-1; i++){   
+                ruta.prev();  
+                cout<<", ";    
+                cout<<ruta.currValue();       
+            }
+
+            cout<<"} - Costo: "<<costo<<endl;
+        } else {
+            cout<<"} - Costo: "<<-1<<endl;
+        }
     }
-    //grafo.mostrarMarcas();
-    //grafo.mostrarVecinos();
+
 }
