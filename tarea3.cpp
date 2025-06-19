@@ -330,24 +330,33 @@ void solicitar_uber(tGrafo& G, int origen, int destino, tLista& camino) {
     for(int i=0; i<n; i++){
         padres[i] = -1;
     }
+
     int existe = 0;
+
     G.setMarkFalse();
     Q.enqueue(origen);
     G.setMark(origen, VISITADO);
+
+    // Recorrido BFS
     while (Q.getSize() != 0) {
         int front = Q.frontValue();
         Q.dequeue();
+
         if(front == destino){
             existe = 1;
             break;
         }
+
+        // Procesa el nodo actual
         if(G.cantVecinosV(front) != 0){
             G.setMark(front, VISITADO);
             vecino = G.first(front);
+
+            // Recorre todos los vecinos del nodo actual
             for (int i = 0; i < G.cantVecinosV(front); i++) {
                 if (G.getMark(vecino) == NOVISITADO) {
                     G.setMark(vecino, VISITADO);
-                    padres[vecino - 1] = front;
+                    padres[vecino - 1] = front; //Establece el padre del vecino
                     Q.enqueue(vecino);
                 }
                 vecino = G.next(front);
@@ -355,8 +364,12 @@ void solicitar_uber(tGrafo& G, int origen, int destino, tLista& camino) {
             G.volverInicio(front);
         }
     }
+
+    // Se encuentra el camino
     if(existe==1){    
         int iterador = destino;
+
+        // Reconstruye el camino desde destino hasta origen verificando haya un enlace entre el vertice del arreglo padres y el iterador actual
         while(iterador != origen){
             if(G.isEdge(padres[iterador-1], iterador)){ //iterador representa el valor en si del nodo
                 camino.append(iterador);
@@ -365,7 +378,7 @@ void solicitar_uber(tGrafo& G, int origen, int destino, tLista& camino) {
         }
         camino.append(origen);
     }else{
-        camino.append(-1);
+        camino.append(-1); 
     }
     delete[] padres;
 }
