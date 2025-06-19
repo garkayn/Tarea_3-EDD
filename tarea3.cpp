@@ -412,9 +412,14 @@ int main(){
         solicitar_uber(grafo,inicio,fin, ruta);
         
         for(int i=0; i<cantConductores;i++){
+            recorridoConductor.clear();
             solicitar_uber(grafo,posicionConductores[i],inicio, recorridoConductor);
-            if (recorridoConductor.length() < dConductor && recorridoConductor.currValue() != -1){
-                dConductor = recorridoConductor.length(); 
+            int distanciaActual = recorridoConductor.length();
+            if ((distanciaActual < dConductor && recorridoConductor.currValue() != -1) ||
+                (distanciaActual == dConductor && recorridoConductor.currValue() != -1 &&
+                posicionConductores[i] < posicionConductores[conductorCercano])) {
+
+                dConductor = distanciaActual;
                 conductorCercano = i;
                 conductorDisponible = true;
             }
