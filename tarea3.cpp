@@ -30,13 +30,49 @@ class tLista{
             head = tail = curr = nullptr;
             listSize = 0; pos = 0;
         }
-        ~tLista() {
+
+        /*
+        // Constructor de copia (implementación correcta)
+        tLista(const tLista& other) {
+            head = tail = curr = nullptr;
+            listSize = pos = 0;
+            tNodoLista* temp = other.head;
+            while (temp != nullptr) {
+                append(temp->id);
+                temp = temp->next;
+            }
+        }
+
+        // Operador de asignación (correctamente formateado)
+        tLista& operator=(const tLista& other) {
+            if (this != &other) {
+                // Liberar memoria existente
+                while (head != nullptr) {
+                    tNodoLista* temp = head;
+                    head = head->next;
+                    delete temp;
+                }
+                // Copiar datos
+                head = tail = curr = nullptr;
+                listSize = pos = 0;
+                tNodoLista* temp = other.head;
+                while (temp != nullptr) {
+                    append(temp->id);
+                    temp = temp->next;
+                }
+            }
+            return *this;
+        }
+        */
+       void clear() {
             tNodoLista* temp;
             while (head != nullptr) {
                 temp = head;
                 head = head->next;
                 delete temp;
             }
+            head = tail = curr = nullptr;
+            listSize = pos = 0;
         }
         void moveToStart() { 
             curr = head; 
@@ -179,18 +215,19 @@ class tGrafo {
         int cantidadVertices;
         int cantidadEnlaces;
     public:
-        ~tGrafo(){
-            delete[] marcas;
-            for(int i=0; i<cantidadVertices ; i++){
-                adyLista[i].~tLista();
-            }
-            delete[] adyLista;
-        }
 
         void leerArchivo(fstream &file){
             file>>cantidadVertices;
             file>>cantidadEnlaces;
             file>>cantidadConductores;
+        }
+
+        void eliminarGrafo(){
+            delete[] marcas;
+            for(int i=0; i<cantidadVertices ; i++){
+                adyLista[i].clear();
+            }
+            delete[] adyLista;
         }
 
         /*****
@@ -361,7 +398,7 @@ tLista solicitar_uber(tGrafo& G, int origen, int destino) {
 
 int main(){
     int cantConductores;
-    int inicio,fin;
+    int inicio = 0, fin = 0;
     fstream file;
     file.open("data1.txt",  ios::in);
     tGrafo grafo;
@@ -372,7 +409,8 @@ int main(){
     for(int i=0; i<cantConductores;i++){
         file>>posicionConductores[i];
     }
-
+    tLista recorridoConductor;
+    tLista ruta;
     while(inicio != -1 && fin != -1){
         bool conductorDisponible = false;
         int dConductor = INFINITO;
@@ -380,8 +418,7 @@ int main(){
         cin>>inicio;
         cin>>fin;
         int conductorCercano;
-        tLista ruta = solicitar_uber(grafo,inicio,fin);
-        tLista recorridoConductor;
+        ruta = solicitar_uber(grafo,inicio,fin);
         for(int i=0; i<cantConductores;i++){
             recorridoConductor = solicitar_uber(grafo,posicionConductores[i],inicio);
             if (recorridoConductor.length() < dConductor && recorridoConductor.currValue() != -1){
@@ -416,8 +453,10 @@ int main(){
         } else {
             cout<<"Gracias por preferir Uber."<<endl;
         }
-
     }
+    ruta.clear();
+    recorridoConductor.clear();
     delete [] posicionConductores;
+    grafo.eliminarGrafo();
 
 }
