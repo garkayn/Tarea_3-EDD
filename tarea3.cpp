@@ -30,15 +30,13 @@ class tLista{
             head = tail = curr = nullptr;
             listSize = 0; pos = 0;
         }
-        void clear() {
+        ~tLista() {
             tNodoLista* temp;
             while (head != nullptr) {
                 temp = head;
                 head = head->next;
                 delete temp;
             }
-            head = tail = curr = nullptr;
-            listSize = pos = 0;
         }
         void moveToStart() { 
             curr = head; 
@@ -101,7 +99,6 @@ class tLista{
                 pos++;
             }
         }
-
 };
 
 // ==============================================
@@ -182,13 +179,18 @@ class tGrafo {
         int cantidadVertices;
         int cantidadEnlaces;
     public:
+        ~tGrafo(){
+            delete[] marcas;
+            for(int i=0; i<cantidadVertices ; i++){
+                adyLista[i].~tLista();
+            }
+            delete[] adyLista;
+        }
+
         void leerArchivo(fstream &file){
             file>>cantidadVertices;
-            cout<<"CANTIDAD DE VERTICES: "<<cantidadVertices<<endl;
             file>>cantidadEnlaces;
-            cout<<"CANTIDAD DE ENLACES: "<<cantidadEnlaces<<endl;
             file>>cantidadConductores;
-            cout<<"CANTIDAD DE CONDUCTORES: "<<cantidadConductores<<endl;
         }
 
         /*****
@@ -291,7 +293,7 @@ class tGrafo {
 // =============================================================
 
 /*****
-* tLista BFS
+* tLista solicitar_uber
 ******
 * La primera parte, visita los nodos en el orden de un BFS, y guarda en el arreglo padres, al vértice que encoló al otro, es decir, si 1 tiene como vecinos a 2, 3 y 4,
 * en la posicíon 1 2 y 3, respectivamente, se guardaría a 1, que encoló y desde ese vértice se visitó a 2, 3 y 4.
@@ -307,7 +309,7 @@ class tGrafo {
 * tLista , el camino más corto desde un origen hacia un destino dado, en caso de que dicho camino no exista, una lista con único elemento un -1
 *****/
 
-tLista BFS(tGrafo& G, int origen, int destino) {
+tLista solicitar_uber(tGrafo& G, int origen, int destino) {
     tCola Q; int vecino;
     int n = G.nVertex();
     int* padres = new int[n];
@@ -330,10 +332,8 @@ tLista BFS(tGrafo& G, int origen, int destino) {
             vecino = G.first(front);
             for (int i = 0; i < G.cantVecinosV(front); i++) {
                 if (G.getMark(vecino) == NOVISITADO) {
-                    //cout<<"NODO A VISITAR: "<<vecino<<endl;
                     G.setMark(vecino, VISITADO);
                     padres[vecino - 1] = front;
-                    //cout<<"VERTICE POR HACER ENQUEUE: "<<vecino<<endl;
                     Q.enqueue(vecino);
                 }
                 vecino = G.next(front);
@@ -353,7 +353,8 @@ tLista BFS(tGrafo& G, int origen, int destino) {
         camino.append(origen);
     }else{
         camino.append(-1);
-    }   
+    }
+    delete[] padres;
     return camino;
 }
 
@@ -379,10 +380,10 @@ int main(){
         cin>>inicio;
         cin>>fin;
         int conductorCercano;
-        tLista ruta = BFS(grafo,inicio,fin);
+        tLista ruta = solicitar_uber(grafo,inicio,fin);
         tLista recorridoConductor;
         for(int i=0; i<cantConductores;i++){
-            recorridoConductor = BFS(grafo,posicionConductores[i],inicio);
+            recorridoConductor = solicitar_uber(grafo,posicionConductores[i],inicio);
             if (recorridoConductor.length() < dConductor && recorridoConductor.currValue() != -1){
                 dConductor = recorridoConductor.length(); 
                 conductorCercano = i;
@@ -417,5 +418,6 @@ int main(){
         }
 
     }
+    delete [] posicionConductores;
 
 }
