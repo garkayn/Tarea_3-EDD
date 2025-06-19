@@ -371,6 +371,9 @@ int main(){
     for(int i=0; i<cantConductores;i++){
         file>>posicionConductores[i];
     }
+    for(int i=0; i<cantConductores; i++){
+        cout<<"CONDUCTOR: "<<i+1<<" EN LA POSICION: "<<posicionConductores[i]<<endl;
+    }
 
     while(inicio != -1 && fin != -1){
         cout<<"Ingrese viaje: "<<endl;
@@ -386,7 +389,6 @@ int main(){
                 conductorCercano = i;
             }
         }
-        posicionConductores[conductorCercano] = fin;
 
         int dViaje = ruta.length();
         int costo = 300*(dConductor-1) + 500*(dViaje-1);
@@ -395,6 +397,7 @@ int main(){
         ruta.moveToStart();
 
         if (ruta.currValue() != -1){
+            posicionConductores[conductorCercano] = fin;
             ruta.moveToEnd();
             cout<<ruta.currValue();
             for(int i = 0; i < ruta.length()-1; i++){   
@@ -407,6 +410,11 @@ int main(){
         } else {
             cout<<"} - Costo: "<<-1<<endl;
         }
+        cout<<"NUEVAS POSICIONES: "<<endl;
+        for(int i=0; i<cantConductores; i++){
+            cout<<"CONDUCTOR: "<<i+1<<" EN LA POSICION: "<<posicionConductores[i]<<endl;
+        }
+
     }
 
 }
