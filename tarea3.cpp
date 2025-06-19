@@ -357,10 +357,10 @@ tLista BFS(tGrafo& G, int origen, int destino) {
     return camino;
 }
 
+
 int main(){
     int cantConductores;
     int inicio,fin;
-    int dConductor = INFINITO;
     fstream file;
     file.open("data1.txt",  ios::in);
     tGrafo grafo;
@@ -371,11 +371,10 @@ int main(){
     for(int i=0; i<cantConductores;i++){
         file>>posicionConductores[i];
     }
-    for(int i=0; i<cantConductores; i++){
-        cout<<"CONDUCTOR: "<<i+1<<" EN LA POSICION: "<<posicionConductores[i]<<endl;
-    }
 
     while(inicio != -1 && fin != -1){
+        bool conductorDisponible = false;
+        int dConductor = INFINITO;
         cout<<"Ingrese viaje: "<<endl;
         cin>>inicio;
         cin>>fin;
@@ -387,16 +386,18 @@ int main(){
             if (recorridoConductor.length() < dConductor && recorridoConductor.currValue() != -1){
                 dConductor = recorridoConductor.length(); 
                 conductorCercano = i;
+                conductorDisponible = true;
             }
         }
 
         int dViaje = ruta.length();
         int costo = 300*(dConductor-1) + 500*(dViaje-1);
 
-        cout<<"Ruta: {";
-        ruta.moveToStart();
+        
 
-        if (ruta.currValue() != -1){
+        if (ruta.currValue() != -1 && conductorDisponible == true){
+            cout<<"Ruta: {";
+            ruta.moveToStart();
             posicionConductores[conductorCercano] = fin;
             ruta.moveToEnd();
             cout<<ruta.currValue();
@@ -407,12 +408,12 @@ int main(){
             }
 
             cout<<"} - Costo: "<<costo<<endl;
-        } else {
+        } else if(inicio != -1 && fin != -1){
+            cout<<"Ruta: {";
+            ruta.moveToStart();
             cout<<"} - Costo: "<<-1<<endl;
-        }
-        cout<<"NUEVAS POSICIONES: "<<endl;
-        for(int i=0; i<cantConductores; i++){
-            cout<<"CONDUCTOR: "<<i+1<<" EN LA POSICION: "<<posicionConductores[i]<<endl;
+        } else {
+            cout<<"Gracias por preferir Uber."<<endl;
         }
 
     }
