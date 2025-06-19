@@ -30,40 +30,6 @@ class tLista{
             head = tail = curr = nullptr;
             listSize = 0; pos = 0;
         }
-
-        /*
-        // Constructor de copia (implementación correcta)
-        tLista(const tLista& other) {
-            head = tail = curr = nullptr;
-            listSize = pos = 0;
-            tNodoLista* temp = other.head;
-            while (temp != nullptr) {
-                append(temp->id);
-                temp = temp->next;
-            }
-        }
-
-        // Operador de asignación (correctamente formateado)
-        tLista& operator=(const tLista& other) {
-            if (this != &other) {
-                // Liberar memoria existente
-                while (head != nullptr) {
-                    tNodoLista* temp = head;
-                    head = head->next;
-                    delete temp;
-                }
-                // Copiar datos
-                head = tail = curr = nullptr;
-                listSize = pos = 0;
-                tNodoLista* temp = other.head;
-                while (temp != nullptr) {
-                    append(temp->id);
-                    temp = temp->next;
-                }
-            }
-            return *this;
-        }
-        */
        void clear() {
             tNodoLista* temp;
             while (head != nullptr) {
@@ -215,20 +181,29 @@ class tGrafo {
         int cantidadVertices;
         int cantidadEnlaces;
     public:
-
+        tGrafo(){
+            marcas = nullptr;
+            adyLista = nullptr;
+            cantidadVertices=0;
+        }
         void leerArchivo(fstream &file){
             file>>cantidadVertices;
             file>>cantidadEnlaces;
             file>>cantidadConductores;
         }
-
         void eliminarGrafo(){
-            delete[] marcas;
-            for(int i=0; i<cantidadVertices ; i++){
-                adyLista[i].clear();
+            if (marcas) {
+                delete[] marcas;
+                marcas = nullptr;  // Evita double free
             }
-            delete[] adyLista;
-        }
+            if (adyLista) {
+                for(int i=0; i<cantidadVertices; i++){
+                    adyLista[i].clear();
+                }
+                delete[] adyLista;
+                adyLista = nullptr;  // Evita double free
+            }
+        }   
 
         /*****
         * void construirGrafo
@@ -280,15 +255,17 @@ class tGrafo {
         }
 
         void setMark(int vertice, bool visitar) {
-            if(visitar){
-                marcas[vertice-1] = VISITADO;
-            }else{
-                marcas[vertice-1] = NOVISITADO;
+            if(vertice == -1){
+                return;
             }
+            marcas[vertice -1] = visitar;
         }
 
-        bool getMark(int vertice){
-            return marcas[vertice-1];
+        bool getMark(int vertice) {
+            if (vertice == -1){
+                return NOVISITADO;
+            }
+            return marcas[vertice - 1];
         }
 
         void setMarkFalse(){
@@ -346,7 +323,7 @@ class tGrafo {
 * tLista , el camino más corto desde un origen hacia un destino dado, en caso de que dicho camino no exista, una lista con único elemento un -1
 *****/
 
-tLista solicitar_uber(tGrafo& G, int origen, int destino) {
+void solicitar_uber(tGrafo& G, int origen, int destino, tLista& camino) {
     tCola Q; int vecino;
     int n = G.nVertex();
     int* padres = new int[n];
@@ -378,7 +355,6 @@ tLista solicitar_uber(tGrafo& G, int origen, int destino) {
             G.volverInicio(front);
         }
     }
-    tLista camino;
     if(existe==1){    
         int iterador = destino;
         while(iterador != origen){
@@ -392,7 +368,6 @@ tLista solicitar_uber(tGrafo& G, int origen, int destino) {
         camino.append(-1);
     }
     delete[] padres;
-    return camino;
 }
 
 
@@ -418,9 +393,13 @@ int main(){
         cin>>inicio;
         cin>>fin;
         int conductorCercano;
-        ruta = solicitar_uber(grafo,inicio,fin);
+        ruta.clear();
+        recorridoConductor.clear();
+
+        solicitar_uber(grafo,inicio,fin, ruta);
+        
         for(int i=0; i<cantConductores;i++){
-            recorridoConductor = solicitar_uber(grafo,posicionConductores[i],inicio);
+            solicitar_uber(grafo,posicionConductores[i],inicio, recorridoConductor);
             if (recorridoConductor.length() < dConductor && recorridoConductor.currValue() != -1){
                 dConductor = recorridoConductor.length(); 
                 conductorCercano = i;
@@ -456,7 +435,7 @@ int main(){
     }
     ruta.clear();
     recorridoConductor.clear();
+    
     delete [] posicionConductores;
     grafo.eliminarGrafo();
-
 }
