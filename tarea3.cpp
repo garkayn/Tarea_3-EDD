@@ -235,25 +235,6 @@ class tGrafo {
             }
         }
 
-        void mostrarVecinos(){ //borrable
-            for(int i=0; i<cantidadVertices; i++){
-                cout<<"VERTICE: "<<i+1<<endl;
-                cout<<"QUE TIENE LOS SIGUIENTES VECINOS: "<<endl;
-                for(int j=0; j<adyLista[i].length(); j++) { 
-                    cout<<adyLista[i].currValue()<<endl;
-                    adyLista[i].next();
-                }
-                adyLista[i].moveToStart();
-                cout<<"ME DEVOLVI AL VECINO: "<<adyLista[i].currValue()<<endl;
-            }
-        }
-
-        void mostrarMarcas(){ //borrable
-            for(int i=0;i<cantidadVertices;i++){
-                cout<<"VERTICE: "<<i+1<<" CON MARCA: "<<marcas[i]<<endl;
-            }
-        }
-
         void setMark(int vertice, bool visitar) {
             if(vertice == -1){
                 return;
@@ -399,61 +380,69 @@ int main(){
     }
     tLista recorridoConductor;
     tLista ruta;
-    while(inicio != -1 && fin != -1){
+    cout<<"Bienvenido a la aplicacion Uber"<<endl;
+    bool flag = true;
+    while(flag){
         bool conductorDisponible = false;
         int dConductor = INFINITO;
         cout<<"Ingrese viaje: "<<endl;
         cin>>inicio;
         cin>>fin;
-        int conductorCercano;
-        ruta.clear();
-        recorridoConductor.clear();
-
-        solicitar_uber(grafo,inicio,fin, ruta);
-        
-        for(int i=0; i<cantConductores;i++){
-            recorridoConductor.clear();
-            solicitar_uber(grafo,posicionConductores[i],inicio, recorridoConductor);
-            int distanciaActual = recorridoConductor.length();
-            if ((distanciaActual < dConductor && recorridoConductor.currValue() != -1) ||
-                (distanciaActual == dConductor && recorridoConductor.currValue() != -1 &&
-                posicionConductores[i] < posicionConductores[conductorCercano])) {
-
-                dConductor = distanciaActual;
-                conductorCercano = i;
-                conductorDisponible = true;
-            }
+        if((inicio<1 || inicio>grafo.nVertex() || fin<1 || fin>grafo.nVertex()) && !(inicio == -1 && fin == -1) ){
+            cout<<"Por favor vuelva a ingresar un viaje valido."<<endl;
         }
-
-        int dViaje = ruta.length();
-        int costo = 300*(dConductor-1) + 500*(dViaje-1);
-
-        
-
-        if (ruta.currValue() != -1 && conductorDisponible == true){
-            cout<<"Ruta: {";
-            ruta.moveToStart();
-            posicionConductores[conductorCercano] = fin;
-            ruta.moveToEnd();
-            cout<<ruta.currValue();
-            for(int i = 0; i < ruta.length()-1; i++){   
-                ruta.prev();  
-                cout<<", ";    
-                cout<<ruta.currValue();       
-            }
-
-            cout<<"} - Costo: "<<costo<<endl;
-        } else if(inicio != -1 && fin != -1){
-            cout<<"Ruta: {";
-            ruta.moveToStart();
-            cout<<"} - Costo: "<<-1<<endl;
-        } else {
+        else if (inicio == -1 && fin == -1){
             cout<<"Gracias por preferir Uber."<<endl;
+            flag = false;
         }
+        else { 
+            int conductorCercano;
+            ruta.clear();
+            recorridoConductor.clear();
+
+            solicitar_uber(grafo,inicio,fin, ruta);
+            
+            for(int i=0; i<cantConductores;i++){
+                recorridoConductor.clear();
+                solicitar_uber(grafo,posicionConductores[i],inicio, recorridoConductor);
+                int distanciaActual = recorridoConductor.length();
+                if ((distanciaActual < dConductor && recorridoConductor.currValue() != -1) ||
+                    (distanciaActual == dConductor && recorridoConductor.currValue() != -1 &&
+                    posicionConductores[i] < posicionConductores[conductorCercano])) {
+
+                    dConductor = distanciaActual;
+                    conductorCercano = i;
+                    conductorDisponible = true;
+                }
+            }
+
+            int dViaje = ruta.length();
+            int costo = 300*(dConductor-1) + 500*(dViaje-1);
+
+            if (ruta.currValue() != -1 && conductorDisponible == true){
+                cout<<"Ruta: {";
+                ruta.moveToStart();
+                posicionConductores[conductorCercano] = fin;
+                ruta.moveToEnd();
+                cout<<ruta.currValue();
+                for(int i = 0; i < ruta.length()-1; i++){   
+                    ruta.prev();  
+                    cout<<", ";    
+                    cout<<ruta.currValue();       
+                }
+
+                cout<<"} - Costo: "<<costo<<endl;
+            } else if(inicio != -1 && fin != -1){
+                cout<<"Ruta: {";
+                ruta.moveToStart();
+                cout<<"} - Costo: "<<-1<<endl;
+            }
+        }
+        
     }
+
     ruta.clear();
     recorridoConductor.clear();
-    
     delete [] posicionConductores;
     grafo.eliminarGrafo();
 }
