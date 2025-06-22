@@ -369,7 +369,7 @@ int main(){
     int cantConductores;
     int inicio = 0, fin = 0;
     fstream file;
-    file.open("data1.txt",  ios::in);
+    file.open("data2.txt",  ios::in);
     tGrafo grafo;
     grafo.leerArchivo(file);
     grafo.construirGrafo(file);
