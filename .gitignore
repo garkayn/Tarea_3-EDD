@@ -1,0 +1,6 @@
+*.exe
+*.o
+/tarea3
+/tarea3.exe
+build/
+.vscode/

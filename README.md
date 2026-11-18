@@ -1,27 +1,20 @@
-# Tarea_3-EDD
-Funcion Solicitar Uber: O(V+E) + O(V^2) + O(V) = O(V^2)
+# Simulador de rutas en grafo — Estructuras de Datos
 
-- O(V+E) corresponde a la complejidad del BFS que se ejecuta una sola vez.
-- O(V^2) corresponde a la reconstruccion del camino, un O(V) por la iteracion del ciclo que reconstruye el camino, que dicho peor caso seria que el camino fuese lineal del primer al ultimo vertice, y el segundo O(V), que esta anidado con dicho for, es el que corresponde a isEdge, que el peor caso podria ser que un vertice tuviese de vecinos a todos los demas y el vecino por el que preguntamos se encuentre en la ultima posicion.
-- O(V) corresponde a nuestro metodo en el grafo llamado setMarkFalse, que setea todos los vertices del grafo en no visitado, haciendo V operaciones en un ciclo, siendo V tambien la cantidad de vertices
+Programa en C++ que modela una red de calles como un grafo y usa búsqueda en anchura (BFS) para calcular rutas y seleccionar el conductor disponible más cercano.
 
-La funcion tambien contiene los siguientes metodos:
--De tCola:
-- enqueue()
-- dequeue()
-- getSize()
-- frontValue()
+## Compilación y ejecución
 
--De tGrafo:
-- nVertex()
-- setMark()
-- cantVecinosV()
-- first()
-- getMark()
-- next()
-- volverInicio()
+Se requiere un compilador compatible con C++11 o posterior.
 
--De tLista:
-- append()
+```bash
+g++ -std=c++17 -O2 tarea3.cpp -o tarea3
+./tarea3
+```
 
-Los cuales se ejecutan en O(1), por tanto no influyen en el analisis de complejidad de nuestra funcion.
+En Windows, ejecuta `tarea3.exe` después de compilar. El programa lee la red y las ubicaciones iniciales de conductores desde `data2.txt`; ejecuta el programa desde esta carpeta. Luego solicita pares de vértices de origen y destino. Ingresa `-1 -1` para terminar.
+
+## Implementación
+
+El repositorio contiene implementaciones propias de lista, cola y grafo, además del algoritmo para reconstruir rutas. La búsqueda en anchura sobre una lista de adyacencia tiene costo `O(V + E)`; el tiempo total también depende de cuántos conductores se evalúan y de cómo se reconstruyen las rutas.
+
+Trabajo universitario. Conserva los créditos del equipo y el contexto de la tarea al reutilizarlo.
